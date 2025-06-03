@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XLO AI Car Recommendation - Mobil Bekas Terpercaya</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background-image: 
+                radial-gradient(circle at 20% 80%, #ff6b35 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, #f7931e 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, #ffd23f 0%, transparent 50%);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 107, 53, 0.1);
+            border-radius: 10px;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 100px;
+            height: 60px;
+            top: 15%;
+            left: 5%;
+            animation-delay: 0s;
+            transform: rotate(45deg);
+        }
+
+        .shape:nth-child(2) {
+            width: 80px;
+            height: 40px;
+            top: 70%;
+            right: 15%;
+            animation-delay: 3s;
+            transform: rotate(-30deg);
+        }
+
+        .shape:nth-child(3) {
+            width: 120px;
+            height: 80px;
+            bottom: 10%;
+            left: 70%;
+            animation-delay: 6s;
+            transform: rotate(15deg);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-30px) rotate(180deg); opacity: 0.2; }
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 107, 53, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideIn 1s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd23f 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 4s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .header-title {
+            font-size: 2em;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+
+        .car-icon {
+            font-size: 2.2em;
+            animation: carMove 3s ease-in-out infinite;
+        }
+
+        @keyframes carMove {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+
+        .header-subtitle {
+            font-size: 1em;
+            opacity: 0.95;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.9em;
+            align-items: center;
+        }
+
+        .whatsapp-contact {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(37, 211, 102, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(37, 211, 102, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+        }
+
+        .whatsapp-contact:hover {
+            background: rgba(37, 211, 102, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .whatsapp-icon {
+            font-size: 1.2em;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #25d366;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px rgba(37, 211, 102, 0.5);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .promo-banner {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+            to { box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); }
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+            scrollbar-width: thin;
+            scrollbar-color: #ff6b35 transparent;
+        }
+
+        .chat-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border-radius: 4px;
+        }
+
+        .chat-message {
+            margin-bottom: 25px;
+            animation: messageSlide 0.6s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            max-width: 85%;
+        }
+
+        .user-message .message-wrapper {
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .bot-avatar {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .message-content {
+            padding: 18px 22px;
+            border-radius: 22px;
+            position: relative;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 1em;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            border-bottom-right-radius: 8px;
+        }
+
+        .bot-message .message-content {
+            background: white;
+            color: #333;
+            border: 2px solid #ff6b35;
+            border-bottom-left-radius: 8px;
+        }
+
+        .message-time {
+            font-size: 0.75em;
+            opacity: 0.7;
+            margin-top: 6px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 18px 22px;
+            background: white;
+            border: 2px solid #ff6b35;
+            border-radius: 22px;
+            border-bottom-left-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: messageSlide 0.6s ease-out;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .typing-dot {
+            width: 10px;
+            height: 10px;
+            background: #ff6b35;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .chat-input {
+            padding: 25px 30px;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-top: 3px solid #ff6b35;
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        #user-input {
+            width: 100%;
+            padding: 18px 24px;
+            padding-right: 60px;
+            border: 3px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 1.05em;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+            resize: none;
+            min-height: 55px;
+            max-height: 130px;
+            font-family: inherit;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        #user-input:focus {
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.15);
+            background: #fff;
+        }
+
+        #user-input::placeholder {
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .input-actions {
+            position: absolute;
+            right: 15px;
+            bottom: 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            background: #f8f9fa;
+            color: #6c757d;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 1em;
+        }
+
+        .action-btn:hover {
+            background: #e9ecef;
+            color: #495057;
+            transform: scale(1.1);
+        }
+
+        #send-button {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.3em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        #send-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.5);
+        }
+
+        #send-button:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        #send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quick-suggestions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .suggestion-chip {
+            padding: 12px 20px;
+            background: rgba(255, 107, 53, 0.1);
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #ff6b35;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(255, 107, 53, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .chat-container { 
+                height: 95vh; 
+                border-radius: 15px;
+                max-width: 100%;
+            }
+            .chat-header { padding: 20px; }
+            .header-title { font-size: 1.6em; }
+            .car-icon { font-size: 1.8em; }
+            .chat-body { padding: 20px; }
+            .chat-input { padding: 20px; }
+            .message-wrapper { max-width: 90%; }
+            .contact-info { font-size: 0.8em; }
+            .whatsapp-contact { padding: 6px 12px; }
+        }
+
+        @media (max-width: 480px) {
+            .header-title { font-size: 1.4em; }
+            .header-subtitle { font-size: 0.9em; }
+            .quick-suggestions { gap: 8px; }
+            .suggestion-chip { 
+                padding: 10px 16px; 
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="brand-logo">
+                <i class="fas fa-car car-icon"></i>
+                <div class="header-title">XLO AI Car Recommendation</div>
+            </div>
+            <div class="header-subtitle">🚗 Solusi Cerdas Mobil Bekas Berkualitas & Bergaransi 🚗</div>
+            
+            <div class="contact-info">
+                <a href="https://wa.me/6281234567778?text=Halo%20XLO%20Car,%20saya%20tertarik%20dengan%20mobil%20bekas%20Anda" 
+                   class="whatsapp-contact" target="_blank">
+                    <i class="fab fa-whatsapp whatsapp-icon"></i>
+                    <span>Chat WhatsApp: 08123456778</span>
+                </a>
+                
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Online 24/7 - Siap Melayani Bapak</span>
+                </div>
+                
+                <div class="promo-banner">
+                    ⭐ PROMO SPESIAL: Trade-In + Cashback Hingga 10 Juta! ⭐
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-body" id="chat-body">
+            <div class="chat-message bot-message">
+                <div class="message-wrapper">
+                    <div class="avatar bot-avatar">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <div class="message-content">
+                            Selamat datang di XLO Car Recommendation! 🚗
+
+Saya adalah konsultan digital yang siap membantu Bapak menemukan mobil bekas berkualitas sesuai kebutuhan dan budget.
+
+💪 KEUNGGULAN XLO CAR:
+✅ Mobil berkualitas, sudah diinspeksi mekanik berpengalaman
+✅ Surat-surat lengkap & aman, dijamin bebas masalah hukum
+✅ Garansi mesin 3 bulan untuk ketenangan Bapak
+✅ Cicilan mudah mulai 2 jutaan/bulan
+✅ Trade-in mobil lama dengan harga terbaik
+
+Silakan sampaikan kebutuhan Bapak:
+• "Mobil keluarga budget 150 juta"
+• "Pick-up untuk usaha 90 jutaan"
+• "SUV diesel 200jt"
+
+                        </div>
+                        <div class="message-time">Sekarang</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-suggestions">
+                <div class="suggestion-chip" onclick="insertSuggestion('mobil keluarga budget 150jt')">
+                    <i class="fas fa-users"></i> Mobil Keluarga budget 1 milliar
+                </div>
+                <div class="suggestion-chip" onclick="insertSuggestion('pickup untuk usaha 200jt')">
+                    <i class="fas fa-truck"></i> Mobil anak muda budget 60 jutaan
+                </div>
+                <div class="suggestion-chip" onclick="insertSuggestion('suv diesel 7 seater')">
+                    <i class="fas fa-car-side"></i> SUV nyaman 300jtan
+                </div>
+                <div class="suggestion-chip" onclick="insertSuggestion('info cicilan kredit mobil')">
+                    <i class="fas fa-credit-card"></i> Info Kredit
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <div class="input-wrapper">
+                <textarea 
+                    id="user-input" 
+                    placeholder="Tulis kebutuhan mobil Bapak di sini..." 
+                    rows="1"
+                ></textarea>
+                <div class="input-actions">
+                    <button class="action-btn" onclick="clearInput()" title="Hapus">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <button id="send-button" title="Kirim Pesan">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const chatBody = document.getElementById('chat-body');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        let isTyping = false;
+
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 130) + 'px';
+        });
+
+        function getCurrentTime() {
+            return new Date().toLocaleTimeString('id-ID', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        function addMessage(message, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const avatarIcon = isUser ? 'fas fa-user' : 'fas fa-user-tie';
+            const avatarClass = isUser ? 'user-avatar' : 'bot-avatar';
+            
+            messageDiv.innerHTML = `
+                <div class="message-wrapper">
+                    <div class="avatar ${avatarClass}">
+                        <i class="${avatarIcon}"></i>
+                    </div>
+                    <div>
+                        <div class="message-content">${message}</div>
+                        <div class="message-time">${getCurrentTime()}</div>
+                    </div>
+                </div>
+            `;
+            
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            if (isTyping) return;
+            isTyping = true;
+            
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="avatar bot-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span style="margin-left: 12px; color: #6c757d; font-size: 0.95em; font-weight: 500;">Konsultan sedang menyiapkan rekomendasi...</span>
+            `;
+            
+            chatBody.appendChild(typingDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+            isTyping = false;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message || isTyping) return;
+
+            addMessage(message, true);
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            
+            sendButton.disabled = true;
+            showTypingIndicator();
+
+            try {
+                // Simulate API delay for better UX
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                hideTypingIndicator();
+                addMessage(data.response, false);
+            } catch (error) {
+                console.error('Error:', error);
+                hideTypingIndicator();
+                addMessage('🔧 Maaf Bapak, sistem sedang maintenance sebentar. Untuk konsultasi langsung, silakan chat WhatsApp kami di 08123456778. Tim XLO Car siap melayani 24/7! 🚗', false);
+            } finally {
+                sendButton.disabled = false;
+            }
+        }
+
+        function insertSuggestion(text) {
+            userInput.value = text;
+            userInput.focus();
+            userInput.style.height = 'auto';
+            userInput.style.height = Math.min(userInput.scrollHeight, 130) + 'px';
+        }
+
+        function clearInput() {
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            userInput.focus();
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Focus input on page load
+        window.addEventListener('load', () => {
+            userInput.focus();
+        });
+
+        // Hide suggestions after first message
+        let firstMessage = true;
+        const originalAddMessage = addMessage;
+        addMessage = function(message, isUser) {
+            if (isUser && firstMessage) {
+                const suggestions = document.querySelector('.quick-suggestions');
+                if (suggestions) {
+                    suggestions.style.animation = 'fadeOut 0.5s ease-out forwards';
+                    setTimeout(() => suggestions.remove(), 500);
+                }
+                firstMessage = false;
+            }
+            originalAddMessage(message, isUser);
+        };
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effect to car icon
+            const carIcon = document.querySelector('.car-icon');
+            if (carIcon) {
+                carIcon.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.1) rotate(5deg)';
+                });
+                carIcon.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1) rotate(0deg)';
+                });
+            }
+        });
+    </script>
+
+    <style>
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-15px); }
+        }
+        
+        /* Additional automotive styling */
+        .brand-logo {
+            position: relative;
+        }
+        
+        .brand-logo::after {
+            content: '🏆';
+            position: absolute;
+            top: -10px;
+            right: -20px;
+            font-size: 1.2em;
+            animation: rotate 4s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>
