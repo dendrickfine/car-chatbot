@@ -43,7 +43,7 @@ lexicon = {
     'family': ['keluarga', 'family', 'mpv', 'minibus', 'minivan'],
     'suv': ['suv', 'jeep', 'tangguh', 'off road'],
     'sedan': ['sedan', 'anak muda'],
-    'hatchback': ['hatchback', 'hatch back', 'city car', 'anak muda'],
+    'hatchback': ['hatchback', 'hatch back', 'city car', 'anak muda','kecil','harian'],
     'pickup': ['pick-up', 'pickup', 'truk', 'double cabin', 'niaga'],
     'coupe': ['coupe', 'sport', 'sports', 'super car', 'anak muda'],
     'youthful': ['anak muda', 'muda', 'trendy', 'stylish', 'keren', 'sporty'],
@@ -55,8 +55,8 @@ lexicon = {
         'hybrid': ['hybrid', 'listrik','irit']
     },
     'transmission': {
-        'automatic': ['automatic', 'otomatis', 'auto', 'triptonic', 'matik', 'matic', 'metik'],  # Tambahkan sinonim
-        'manual': ['manual']
+        'automatic': ['automatic', 'otomatis', 'auto', 'triptonic', 'matik', 'at','a/t','matic', 'metik'],  # Tambahkan sinonim
+        'manual': ['manual','m/t','mt']
     },
     'year': ['tahun', 'year']
 }
