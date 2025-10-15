@@ -2,26 +2,34 @@ from flask import Flask, request, jsonify, render_template
 import pandas as pd
 import nltk
 import re
+import os
+import pickle
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-import random  # Tambahkan import random untuk randomisasi
+import random
 
-# Download required NLTK data
+# Download NLTK data (sekali saja, tidak setiap request)
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
 nltk.download('wordnet', quiet=True)
 
 app = Flask(__name__)
 
-# Load and clean the dataset (same as provided)
-try:
+MODEL_PATH = 'mobil_model.pkl'
+
+# ==========================
+# 1. Fungsi untuk Load & Preprocess Dataset
+# ==========================
+def build_model():
+    print("🔄 Membaca dan preprocessing dataset mobilbekas.csv...")
     df = pd.read_csv('mobilbekas.csv')
     df = df.dropna(subset=['Harga', 'Merek', 'Model', 'Tahun', 'Tipe bodi', 'Tipe bahan bakar', 'Transmisi'])
     df = df[~df['Model'].str.contains('Lain-lain', case=False, na=False)]
     df = df[~df['Varian'].str.contains('Lain-lain', case=False, na=True)]
     df['Harga'] = pd.to_numeric(df['Harga'], errors='coerce')
     df['Tahun'] = pd.to_numeric(df['Tahun'], errors='coerce', downcast='integer')
+
     def parse_mileage(mileage):
         if isinstance(mileage, str) and '-' in mileage:
             try:
@@ -30,15 +38,32 @@ try:
             except:
                 return float('inf')
         return float('inf')
+
     df['Jarak tempuh (km)'] = df['Jarak tempuh'].apply(parse_mileage)
     df = df[df['Harga'].notnull() & df['Tahun'].notnull() & (df['Jarak tempuh (km)'] != float('inf'))]
+
+    # Normalisasi tipe bodi untuk beberapa model populer
     df.loc[df['Model'].str.contains('Mobilio', case=False, na=False), 'Tipe bodi'] = 'MPV'
     df.loc[df['Model'].str.contains('Ertiga', case=False, na=False), 'Tipe bodi'] = 'MPV'
     df.loc[df['Model'].str.contains('Xpander', case=False, na=False), 'Tipe bodi'] = 'MPV'
-except FileNotFoundError:
-    print("Error: File 'mobilbekas.csv' not found.")
-    exit(1)
+    return df
 
+# ==========================
+# 2. Load Model dari Cache atau Buat Baru
+# ==========================
+if os.path.exists(MODEL_PATH):
+    print("✅ Memuat model mobil dari cache...")
+    with open(MODEL_PATH, 'rb') as f:
+        df = pickle.load(f)
+else:
+    df = build_model()
+    with open(MODEL_PATH, 'wb') as f:
+        pickle.dump(df, f)
+    print(f"✅ Model disimpan ke cache: {MODEL_PATH}")
+
+# ==========================
+# 3. Lexicon & Preprocessing Tools
+# ==========================
 lexicon = {
     'family': ['keluarga', 'family', 'mpv', 'minibus', 'minivan'],
     'suv': ['suv', 'jeep', 'tangguh', 'off road'],
@@ -55,7 +80,7 @@ lexicon = {
         'hybrid': ['hybrid', 'listrik','irit']
     },
     'transmission': {
-        'automatic': ['automatic', 'otomatis', 'auto', 'triptonic', 'matik', 'at','a/t','matic', 'metik'],  # Tambahkan sinonim
+        'automatic': ['automatic', 'otomatis', 'auto', 'triptonic', 'matik', 'at','a/t','matic', 'metik'],
         'manual': ['manual','m/t','mt']
     },
     'year': ['tahun', 'year']
@@ -64,9 +89,9 @@ lexicon = {
 stop_words = set(stopwords.words('indonesian') + stopwords.words('english') + ['yang', 'untuk', 'dengan'])
 lemmatizer = WordNetLemmatizer()
 
-# Preprocess text, extract budget, year, parse query, calculate score, filter cars, generate recommendation
-# (Use the same functions as provided: preprocess_text, extract_budget, extract_year, parse_query, calculate_score, filter_cars, generate_recommendation)
-
+# ==========================
+# 4. Fungsi NLP & Filter (tidak berubah)
+# ==========================
 def preprocess_text(text):
     text = text.lower()
     tokens = word_tokenize(text)
@@ -74,9 +99,7 @@ def preprocess_text(text):
     tokens = [lemmatizer.lemmatize(token) for token in tokens]
     return tokens
 
-# Fungsi extract_budget (tambahkan penanganan untuk 'miliar')
 def extract_budget(text):
-    # Pola untuk mendeteksi jutaan atau miliaran
     budget_pattern = r'(\d+\.?\d*)\s*(jtan|jt|juta|miliar)'
     match = re.search(budget_pattern, text, re.IGNORECASE)
     if match:
@@ -139,7 +162,6 @@ def parse_query(text):
     if car_type == 'family':
         car_type = 'mpv'
 
-    # Tambahkan aturan: jika "suv" dan "nyaman" terdeteksi, set fuel_type ke 'bensin'
     if car_type == 'suv' and is_comfortable and fuel_type is None:
         fuel_type = 'bensin'
 
@@ -202,22 +224,23 @@ def filter_cars(parsed_query):
     if parsed_query['transmission']:
         filtered_df = filtered_df[filtered_df['Transmisi'].str.lower().str.contains(parsed_query['transmission'], case=False, na=False)]
     if parsed_query['year_operator'] and parsed_query['year_value']:
-        if parsed_query['year_operator'] == '>':
-            filtered_df = filtered_df[filtered_df['Tahun'] > parsed_query['year_value']]
-        elif parsed_query['year_operator'] == '>=':
-            filtered_df = filtered_df[filtered_df['Tahun'] >= parsed_query['year_value']]
-        elif parsed_query['year_operator'] == '<':
-            filtered_df = filtered_df[filtered_df['Tahun'] < parsed_query['year_value']]
-        elif parsed_query['year_operator'] == '<=':
-            filtered_df = filtered_df[filtered_df['Tahun'] <= parsed_query['year_value']]
-        elif parsed_query['year_operator'] == '=':
-            filtered_df = filtered_df[filtered_df['Tahun'] == parsed_query['year_value']]
+        op = parsed_query['year_operator']
+        val = parsed_query['year_value']
+        if op == '>':
+            filtered_df = filtered_df[filtered_df['Tahun'] > val]
+        elif op == '>=':
+            filtered_df = filtered_df[filtered_df['Tahun'] >= val]
+        elif op == '<':
+            filtered_df = filtered_df[filtered_df['Tahun'] < val]
+        elif op == '<=':
+            filtered_df = filtered_df[filtered_df['Tahun'] <= val]
+        elif op == '=':
+            filtered_df = filtered_df[filtered_df['Tahun'] == val]
     if parsed_query['comfortable']:
         luxury_brands = ['Mercedes-Benz', 'BMW', 'Audi', 'Lexus', 'Land Rover', 'Porsche', 'Jaguar', 'Mini Cooper']
         filtered_df = filtered_df[(filtered_df['Merek'].isin(luxury_brands)) | (filtered_df['Tahun'] >= 2018)]
     return filtered_df
 
-# Fungsi generate_recommendation yang dimodifikasi
 def generate_recommendation(parsed_query):
     filtered_cars = filter_cars(parsed_query)
     if filtered_cars.empty:
@@ -231,32 +254,20 @@ def generate_recommendation(parsed_query):
         suggestion_text = " atau ".join(suggestions) if suggestions else "menyesuaikan kriteria lainnya"
         return (f"Maaf, tidak ada mobil yang sesuai dengan kriteria Anda. "
                 f"Coba {suggestion_text}.")
-    
-    # Hitung skor untuk setiap mobil
+
     filtered_cars['Score'] = filtered_cars.apply(
         lambda row: calculate_score(row, parsed_query['budget'], parsed_query['year_value'],
                                  parsed_query['youthful'], parsed_query['comfortable'], parsed_query['car_type']), axis=1)
-    
-    # Urutkan berdasarkan skor (descending)
     filtered_cars = filtered_cars.sort_values(by='Score', ascending=False)
-    
-    # Hapus duplikat berdasarkan Merek, Model, dan Tahun
     filtered_cars = filtered_cars.drop_duplicates(subset=['Merek', 'Model', 'Tahun'])
-    
-    # Pilih kandidat dengan skor tinggi (misalnya, 10 mobil teratas atau skor > 0.7)
-    top_candidates = filtered_cars.head(10)  # Ambil 10 mobil teratas
-    # Alternatif: top_candidates = filtered_cars[filtered_cars['Score'] > 0.7]
-    
-    # Jika ada kandidat, pilih hingga 3 mobil secara acak
+    top_candidates = filtered_cars.head(10)
+
     if not top_candidates.empty:
-        # Ambil hingga 3 mobil secara acak dari top_candidates
         num_recommendations = min(3, len(top_candidates))
         recommendations = top_candidates.sample(n=num_recommendations, random_state=None).to_dict('records')
     else:
-        # Jika tidak ada kandidat, kembalikan pesan default
         return "Maaf, tidak ada mobil yang cukup relevan untuk direkomendasikan. Coba ubah kriteria Anda."
-    
-    # Format respons
+
     response = "Berikut rekomendasi mobil bekas berdasarkan kriteria Anda:\n\n"
     for i, car in enumerate(recommendations, 1):
         response += (f"{i}. {car['Merek']} {car['Model']} {car['Varian'] or 'N/A'} ({int(car['Tahun'])})\n"
@@ -266,17 +277,17 @@ def generate_recommendation(parsed_query):
                      f"   Transmisi: {car['Transmisi']}\n"
                      f"   Jarak Tempuh: {car['Jarak tempuh']}\n"
                      f"   Lokasi: {car['Lokasi']}\n\n")
-    
     return response
 
-# Fungsi is_out_of_context (tambahkan 'miliar' ke car_related_keywords)
 def is_out_of_context(text):
     car_related_keywords = ['mobil', 'car', 'suv', 'sedan', 'mpv', 'minibus', 'hatchback', 'pickup', 
-                           'coupe', 'bensin', 'diesel', 'hybrid', 'budget', 'harga', 'juta', 'miliar',  # Tambahkan 'miliar'
+                           'coupe', 'bensin', 'diesel', 'hybrid', 'budget', 'harga', 'juta', 'miliar',
                            'tahun', 'anak muda', 'trendy', 'sporty', 'nyaman', 'mewah', 'niaga']
     return not any(keyword in text.lower() for keyword in car_related_keywords)
 
-# Flask routes
+# ==========================
+# 5. Flask Routes
+# ==========================
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -286,14 +297,14 @@ def chat():
     user_input = request.json.get('message')
     if not user_input:
         return jsonify({'response': 'Silakan masukkan pertanyaan.'})
-    
+
     if user_input.lower() == 'keluar':
         return jsonify({'response': 'Terima kasih telah menggunakan chatbot!'})
-    
+
     if is_out_of_context(user_input):
         return jsonify({'response': 'Maaf, pertanyaan Anda tidak relevan dengan pencarian mobil bekas. '
                                     'Silakan masukkan pertanyaan terkait mobil, seperti "mobil keluarga budget 100 juta".'})
-    
+
     try:
         parsed_query = parse_query(user_input)
         if parsed_query['budget'] is None:
